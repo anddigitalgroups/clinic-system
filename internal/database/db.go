@@ -24,22 +24,22 @@ func NewDB() (*pgxpool.Pool, error) {
 		return nil, err
 	}
 
-	// connection pool size
 	config.MaxConns = 10
+	config.MinConns = 2
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	dbpool, err := pgxpool.NewWithConfig(ctx, config)
+	db, err := pgxpool.NewWithConfig(ctx, config)
 	if err != nil {
 		return nil, err
 	}
 
-	// health check
-	err = dbpool.Ping(ctx)
+	// Ping database
+	err = db.Ping(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	return dbpool, nil
+	return db, nil
 }

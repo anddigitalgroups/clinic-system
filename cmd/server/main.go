@@ -1,30 +1,46 @@
 package main
 
 import (
-	"log"
-
 	"clinic-system/internal/api"
 	"clinic-system/internal/database"
 
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 )
 
 func main() {
-	err := godotenv.Load()
+	// Initialize logger
+	logger, err := zap.NewDevelopment()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		panic("failed to initialize logger")
+	}
+	defer logger.Sync()
+
+	logger.Info("Starting clinic system")
+
+	// Load environment variables
+	err = godotenv.Load()
+	if err != nil {
+		logger.Fatal("Error loading .env file")
 	}
 
+	// Connect database
 	db, err := database.NewDB()
 	if err != nil {
-		log.Fatalf("failed to connect to database: %v", err)
+		logger.Fatal("Failed to connect to database", zap.Error(err))
 	}
 
 	defer db.Close()
 
-	log.Println("Database connected successfully")
+	logger.Info("Database connected successfully")
 
-	router := api.SetupRouter()
+	// Setup router (Dependency Injection)
+	router := api.SetupRouter(db)
 
-	router.Run(":8080")
+	logger.Info("Server starting", zap.String("port", "8080"))
+
+	err = router.Run(":8080")
+	if err != nil {
+		logger.Fatal("Server failed to start", zap.Error(err))
+	}
 }
