@@ -1,10 +1,10 @@
 CREATE TABLE users (
     id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
 
-    email TEXT NOT NULL UNIQUE,
-    password_hash TEXT NOT NULL,
+    email VARCHAR NOT NULL UNIQUE,
+    password_hash VARCHAR NOT NULL,
 
-    role TEXT NOT NULL
+    role VARCHAR NOT NULL
         CHECK (role IN ('super_admin', 'admin', 'doctor', 'patient')),
 
     created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
